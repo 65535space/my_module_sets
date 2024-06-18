@@ -34,20 +34,20 @@ class HomeScreenState extends State<HomeScreen>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
-      if (_tabController.indexIsChanging &&
-          _tabController.index == 1 &&
-          !_isModalShown) {
-        _isModalShown = true;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) {
-              return const Center(child: Text('モーダルシート'));
-            },
-          ).whenComplete(() {
-            _isModalShown = false;
+      if (_tabController.indexIsChanging) {
+        if (_tabController.index == 1 && !_isModalShown) {
+          _isModalShown = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showModalBottomSheet(
+              context: context,
+              builder: (BuildContext context) {
+                return const Center(child: Text('モーダルシート'));
+              },
+            ).whenComplete(() {
+              _isModalShown = false;
+            });
           });
-        });
+        }
       }
     });
   }
@@ -71,7 +71,16 @@ class HomeScreenState extends State<HomeScreen>
             Tab(text: '切り替え'),
           ],
           onTap: (index) {
-            if (index == 1 && !_isModalShown) {
+            if (index == 2) {
+              setState(() {
+                _isSwitched = !_isSwitched;
+                if (_isSwitched) {
+                  _tabController.index = 2;
+                } else {
+                  _tabController.index = 1;
+                }
+              });
+            } else if (index == 1 && !_isModalShown) {
               _isModalShown = true;
               showModalBottomSheet(
                 context: context,
@@ -87,29 +96,11 @@ class HomeScreenState extends State<HomeScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          const Center(child: Text('1')),
-          const Center(child: Text('2')), // 生成タブに移動すると「2」と表示
-          _buildSwitchScreen(),
+        children: const [
+          Center(child: Text('1')),
+          Center(child: Text('2')), // 生成タブに移動すると「2」と表示
+          Center(child: Text('3')), // 切り替えタブに移動すると「3」と表示
         ],
-      ),
-    );
-  }
-
-  Widget _buildSwitchScreen() {
-    return Center(
-      child: ElevatedButton(
-        onPressed: () {
-          setState(() {
-            _isSwitched = !_isSwitched;
-            if (_isSwitched) {
-              _tabController.animateTo(1);
-            } else {
-              _tabController.animateTo(2);
-            }
-          });
-        },
-        child: const Text('3'),
       ),
     );
   }
